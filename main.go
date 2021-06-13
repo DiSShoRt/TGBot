@@ -1,15 +1,15 @@
 package main
 
 import (
-	"os"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
-	"net/http"
 	"math/rand"
-	"io"
-	"bufio"
+	"net/http"
+	"os"
 	"fmt"
-	
+	p "telegrambotis/parser"
+
+	_ "github.com/PuerkitoBio/goquery"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 const (
@@ -27,35 +27,38 @@ var button = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.Ne
 var button1 = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("ваблабдабда"),tgbotapi.NewKeyboardButton("fantastic")))
 
 
+
 func main() {
 	port := os.Getenv("PORT")
-
+	
 	go func() {
 		log.Fatal(http.ListenAndServe(":"+ port , nil))
 	}()
-	bot, err := tgbotapi.NewBotAPI(TOKEN)
+	Bot, err := tgbotapi.NewBotAPI(TOKEN)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("create the bot")
-	_ ,err = bot.SetWebhook(tgbotapi.NewWebhook(WebHook))
+	_ ,err = Bot.SetWebhook(tgbotapi.NewWebhook(WebHook))
 	if err != nil {
 		log.Fatal("setting Webhook %v", err )
 	
 	}
 	log.Println("OK")
+
 	
 
-	updates := bot.ListenForWebhook("/")
+	updates := Bot.ListenForWebhook("/")
 	for update := range updates {
 		log.Println(update.Message.Chat.ID)	
 		 
 		switch update.Message.Text {
 			case "/start": {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID,"Это мой первый бот! У него ещё мало функций, но в ближайшее время их станет больше!")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID,"Это мой первый бот! У него ещё мало функций, но в ближайшее время их станет больше! \n Функции: \n /cinema покажет популярные фильмы на Kинопоиск")
 				button.OneTimeKeyboard = true
 				msg.ReplyMarkup = button
-				_, err := bot.Send(msg)
+				_, err := Bot.Send(msg)
 
 				msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				if err != nil {
@@ -63,7 +66,7 @@ func main() {
 				}
 			}
 			case "/helpme":
-				_ ,err := bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,"можете помочь мне"))
+				_ ,err := Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,"можете помочь мне"))
 				if err != nil {
 					log.Fatal(err)
 				} 
@@ -72,21 +75,37 @@ func main() {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID,"What?")
 					button1.OneTimeKeyboard = true
 					msg.ReplyMarkup = button1
-					_, err := bot.Send(msg)
+					_, err := Bot.Send(msg)
 					if err != nil {
 						log.Fatal(err)
 					}
+			case "/cinema":
+				films := make([]string,6)
+				_, err = Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,"Now in cinema"))
+				for _,v := range p.GetFilms(films) {
+					ms:="https://www.kinopoisk.ru" + v
+					if ms !="https://www.kinopoisk.ru" {
+						_, err = Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,ms))
+						if err!=nil {
+							fmt.Println(err)
+						}
+					}
+
+				
+			}
+			
+			
 			default:
 				M := []string{a,b,c,d,e,f}
 				if update.Message.From.ID ==1447028730 {
-					_, err := bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, M[rand.Intn(len(M))]))
-					_, err = bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,update.Message.Text))
+					_, err := Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, M[rand.Intn(len(M))]))
+					_, err = Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,update.Message.Text))
 					if err != nil {
 						log.Fatal(err)
 					}
 				} else {
-					_, err := bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,update.Message.Text))
-					_, err = bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Sticker.Emoji))
+					_, err := Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,update.Message.Text))
+					_, err = Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Sticker.Emoji))
 				if err != nil {
 					log.Fatal(err)
 				}
