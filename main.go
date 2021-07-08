@@ -13,12 +13,6 @@ import (
 )
 
 const (
-	a = "Интересно, моя хорошая"
-	b = "Да-да милашка"
-	c = "Хм, дорогуша"
-	d = "Вот это ты даешь, солнышко"
-	e = "Такого я не ожидал, моя хорошая"
-	f = "Да, хорошо, Dodo chips"
 	TOKEN = "1359423281:AAGMKw_Nn45jvu37EH5_n8G6FWoFXM42i9Q"
 	WebHook = "https://telegrambotis.herokuapp.com/"
 )
@@ -96,14 +90,8 @@ func main() {
 			
 			
 			default:
-				M := []string{a,b,c,d,e,f}
-				if update.Message.From.ID ==1447028730 {
-					_, err := Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, M[rand.Intn(len(M))]))
-					_, err = Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,update.Message.Text))
-					if err != nil {
-						log.Fatal(err)
-					}
-				} else {
+				
+		
 					_, err := Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID,update.Message.Text))
 					_, err = Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Sticker.Emoji))
 				if err != nil {
